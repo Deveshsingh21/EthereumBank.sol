@@ -16,7 +16,7 @@
 -  Create a new file by clicking on the "+" icon in the left-hand sidebar. Save the file with a .sol extension.
 - Copy and paste the following code into the file.
 
-''' <solidity>
+``` <solidity>
  // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
@@ -63,7 +63,17 @@ contract EthereumBank {
 
 
 }
+```
+To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.20" (or another compatible version), and then click on the "EthereumBank.sol" button.
+    
+Once the code is compiled, you can deploy the contract by clicking on the "Deploy & Run Transactions" tab in the left-hand sidebar. Select the **EthereumBank** contract from the dropdown menu, and then click on the "Deploy" button.
 
-'''
+Once the contract is deployed, you can interact with it by calling the DepositEth , WithdrawalEth function. Click on the "EthereumBank" contract in the left-hand sidebar, and then click on the "DepositEth"or "WithdrawalEth" function. Finally, click on the "transact" button to execute the function and retrieve the output.
+
+## Authors
+Devesh Singh Metacrafters deveshsingh5603@gmail.com
+
+## License
+This project is licensed under the MIT License - see the LICENSE.md file for details
 
  
