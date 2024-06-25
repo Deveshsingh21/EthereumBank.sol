@@ -37,7 +37,7 @@ contract EthereumBank {
     }
     event Deposit(address indexed account, uint amount);
     event Withdraw (address indexed account, uint amount);
-    event FullWithdrawl(address indexed account, uint amount);
+
 
 
     function DepositEth()public payable {
