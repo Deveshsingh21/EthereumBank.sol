@@ -1,76 +1,107 @@
  ### Use of Error Handling By require(),assert(),revert()
  ## Video Explanation 
  https://www.loom.com/share/26678c09f7094e3391cfbe137497e923
-# ETH + AVAX Intermediate Course 
-- This program shows a simple contract made in Solidity to deposit and transfer ether into a particular account
+# Netflix Subscription 
+- This program shows a simple contract made in Solidity to subscribe , renew , or cancel your netflix subscription.
 - ## Description
-- The 'EthereumBank' contract allows user to deposit and withdrawal Ether into the contract while using certain restrictions to ensure no error.
-- It contains state variables **owner** storing the address of contract owner,**balances** stores the ETH balance for each user as mapping.
-- It contains modifier **onlyOwner** that restricts the execution of certain functions to the contract owner.
+- The 'NetflixSubscription.' contract allows user to subscribe , renew , or cancel your netflix subscription using your address while using certain restrictions to ensure no error.
+- It contains state variables **owner** storing the address of contract owner,**subscription_Fee** which is initialised to the value of 2 ether,another variable **subscription_Duration** set to value 30 days.
+- It contains modifier **onlySubscriber()** that restricts the execution of certain functions to the active subscribers only.
 - Contructor sets the deployer's address as the contract owner.
 - #### Event
-- **Deposit**,**Withdraw**, are used to log the the crucial information such as deposit details,withdrawaldetails.
+    **Subscribed**, **Renewed**,**Canceled**, are used to log the the crucial information such as subscribers address , and subscription end date.
 - 
 - #### Functions
-- **DepositEth()**,**WithdrawalEth(uint amount)**,**getBalance()** Allows users to deposit Ether ,withdraw Ether, get the balance of the sender.
+- **subscribe_Netflix()**,**renewSubscription()**,**cancelSubscription()** Allows users to subscribe for new service ,renew existing plan or cancel active subscription.
 - ## Executing Program
 -  We can use remix- an online solidity compiler to run this Program at remix.ethereum.
 -  Create a new file by clicking on the "+" icon in the left-hand sidebar. Save the file with a .sol extension.
 - Copy and paste the following code into the file.
 
-``` <solidity>
- // SPDX-License-Identifier: MIT
+``` // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract EthereumBank {
+contract NetflixSubscription {
+
     address public owner;
-    mapping(address => uint)private balances;
+    uint public subscription_Fee = 2 ether;
+    uint public subscription_Duration = 30 days;
 
-    modifier onlyOwner(){
-        require(msg.sender == owner,"Only Owner Authorised for Transaction");
-        _;
+    struct Subscriber_Data{
+        bool activationStatus;
+        uint subscription_tillDate;
     }
+     
+   mapping(address => Subscriber_Data) public subscribers;
 
-    constructor() {
-        owner = msg.sender;
+       event Subscribed(address indexed subscriberinfo, uint endTime);
+    event Renewed(address indexed subscriberinfo, uint newEndTime);
+    event Canceled(address indexed subscriberinfo);
 
-    }
-    event Deposit(address indexed account, uint amount);
-    event Withdraw (address indexed account, uint amount);
-
-
-
-    function DepositEth()public payable {
-        require(msg.value > 0, "Deposit Amount Greater than 0");
-        balances[msg.sender] += msg.value;
-        emit Deposit(msg.sender,msg.value);
-    }
-    function WithdrawalEth(uint amount)public  {
-        require(amount > 0, "Withdraw Amount Greater than 0");
-        if(balances[msg.sender]< amount){
-            revert("not enough balances");
-        }
       
 
-        uint initialBalance = address(this).balance;
-        assert (initialBalance >= amount);
-        balances[msg.sender] -= amount;
-        payable(msg.sender).transfer(amount);
-        assert(address(this).balance == initialBalance - amount);
-        emit Withdraw(msg.sender,amount);
+    modifier onlySubscriber() {
+        require(subscribers[msg.sender].activationStatus, "You are not an active subscriber.");
+        require(subscribers[msg.sender].subscription_tillDate > block.timestamp, "Your subscription has expired.");
+    
+        _;
+
     }
-    function getBalance() public view returns (uint){
-        return balances[msg.sender];
+        constructor() {
+        owner = msg.sender;
     }
+    function subscribe_Netflix() public payable {
+        require(msg.value == subscription_Fee, "Incorrect subscription fee.");
+        
+
+        if (subscribers[msg.sender].activationStatus) {
+            revert("You are already subscribed to Netflix.");
+        }
+        subscribers[msg.sender].activationStatus = true;
+        subscribers[msg.sender].subscription_tillDate = block.timestamp + subscription_Duration;
+
+        assert(subscribers[msg.sender].subscription_tillDate > block.timestamp);
+        emit Subscribed(msg.sender, subscribers[msg.sender].subscription_tillDate);
+    }
+    function renewSubscription() public payable onlySubscriber {
+   
+        require(msg.value == subscription_Fee, "Incorrect subscription fee.");
+        Subscriber_Data memory subscriber = subscribers[msg.sender];
+        
+        require(subscriber.subscription_tillDate > block.timestamp, "Your subscription has expired. Please subscribe again.");
+        
+        subscriber.subscription_tillDate += subscription_Duration;
+        assert(subscriber.subscription_tillDate > block.timestamp);
+
+        subscribers[msg.sender] = subscriber; 
+
+        emit Renewed(msg.sender, subscriber.subscription_tillDate);
+    }
+    function cancelSubscription() public onlySubscriber {
+        Subscriber_Data memory subscriber = subscribers[msg.sender];
+        subscriber.activationStatus = false;
+        subscriber.subscription_tillDate = 0;
+
+        subscribers[msg.sender] = subscriber; 
+
+        emit Canceled(msg.sender);
+    }
+
 
 
 }
-```
-To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.20" (or another compatible version), and then click on the "EthereumBank.sol" button.
-    
-Once the code is compiled, you can deploy the contract by clicking on the "Deploy & Run Transactions" tab in the left-hand sidebar. Select the **EthereumBank** contract from the dropdown menu, and then click on the "Deploy" button.
 
-Once the contract is deployed, you can interact with it by calling the DepositEth , WithdrawalEth function. Click on the "EthereumBank" contract in the left-hand sidebar, and then click on the "DepositEth"or "WithdrawalEth" function. Finally, click on the "transact" button to execute the function and retrieve the output.
+
+   
+
+
+
+```
+To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.20" (or another compatible version), and then click on the "Netflixsubscription.sol" button.
+    
+Once the code is compiled, you can deploy the contract by clicking on the "Deploy & Run Transactions" tab in the left-hand sidebar. Select the **NetflixSubscription** contract from the dropdown menu, and then click on the "Deploy" button.
+
+Once the contract is deployed, you can interact with it by calling the  subscribe_Netflix(), renewSubscription(),cancelSubscription()  function by any existing account in the list. 
 
 ## Authors
 Devesh Singh Metacrafters deveshsingh5603@gmail.com
